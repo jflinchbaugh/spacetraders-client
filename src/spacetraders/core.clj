@@ -82,10 +82,25 @@
   (let [[p e] (call-api http/get "my/contracts")]
     p))
 
+(defn accept-contract
+  [contract-id]
+  (let [[p e] (call-api http/post (str "my/contracts/" contract-id "/accept"))]
+    p))
+
 (defn waypoint
   [waypoint-symbol]
   (let [system (str/join "-" (take 2 (str/split waypoint-symbol #"-")))
         [p e] (call-api http/get (str "systems/" system "/waypoints/" waypoint-symbol))]
+    p))
+
+(defn waypoints
+  [system]
+  (let [[p e] (call-api http/get (str "systems/" system "/waypoints"))]
+    p))
+
+(defn ships
+  []
+  (let [[p e] (call-api http/get "my/ships")]
     p))
 
 (comment
@@ -94,12 +109,14 @@
 
   (agent)
 
-  (faction "COSMIC")
-
-  (factions)
-
   (contracts)
 
+  (accept-contract "clhy1w7cb1cqns60dobah308a")
+
   (waypoint "X1-VS75-70500X")
+
+  (waypoints "X1-VS75")
+
+  (ships)
   
   .)
