@@ -15,6 +15,8 @@
 
 (def token (atom (str/trim (slurp "token.txt"))))
 
+(add-watch token :persist-token (fn [k r ov nv] (spit "token.txt" nv)))
+
 (defn standard-headers []
   {"Content-Type" "application/json"
    "Authorization" (str "Bearer " @token)})
@@ -59,7 +61,6 @@
     (if (nil? new-token) (throw (Exception. (str "Failed to register: " error)))
         (do
           (reset! token new-token)
-          (spit "token.txt" new-token)
           response))))
 
 (defn agent
@@ -115,7 +116,7 @@
 
   (waypoint "X1-VS75-70500X")
 
-  (waypoints "X1-VS75")
+  (map (fn [{:keys [type]}] type) (waypoints "X1-VS75"))
 
   (ships)
   
