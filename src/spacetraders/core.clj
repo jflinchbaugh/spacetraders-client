@@ -1,4 +1,4 @@
-(ns spacetrader.core
+(ns spacetraders.core
   (:gen-class)
   (:require [org.httpkit.client :as http]
             [clojure.data.json :as json]
@@ -9,7 +9,7 @@
             [clojure.string :as str]))
 
 (log/merge-config!;
- {:appenders {:spit (log-appenders/spit-appender {:fname "spacetrader.log"})}})
+ {:appenders {:spit (log-appenders/spit-appender {:fname "spacetraders.log"})}})
 
 (def base-url "https://api.spacetraders.io/v2/")
 
