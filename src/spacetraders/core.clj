@@ -88,21 +88,36 @@
   (let [[p e] (call-api http/post (str "my/contracts/" contract-id "/accept"))]
     p))
 
+(defn waypoints
+  [system]
+  (let [[p e] (call-api http/get (str "systems/" system "/waypoints"))]
+    p))
+
 (defn waypoint
   [waypoint-symbol]
   (let [system (str/join "-" (take 2 (str/split waypoint-symbol #"-")))
         [p e] (call-api http/get (str "systems/" system "/waypoints/" waypoint-symbol))]
     p))
 
-(defn waypoints
-  [system]
-  (let [[p e] (call-api http/get (str "systems/" system "/waypoints"))]
+(defn shipyard
+  [waypoint-symbol]
+  (let [system (str/join "-" (take 2 (str/split waypoint-symbol #"-")))
+        [p e] (call-api http/get (str "systems/" system "/waypoints/" waypoint-symbol "/shipyard"))]
     p))
 
 (defn ships
   []
   (let [[p e] (call-api http/get "my/ships")]
     p))
+
+(defn buy-ship
+  [waypoint-symbol ship-type]
+  (let [[response error] (call-api
+                           http/post
+                           "my/ships"
+                           {:waypointSymbol waypoint-symbol :shipType ship-type})
+       ]
+    response))
 
 (comment
 
@@ -116,8 +131,23 @@
 
   (waypoint "X1-VS75-70500X")
 
-  (map (fn [{:keys [type]}] type) (waypoints "X1-VS75"))
+  (->>
+    (waypoints "X1-VS75")
+    (filter (comp (partial some #{"SHIPYARD"}) (partial map :symbol) :traits))
+    (map :symbol)
+    first
+    shipyard
+    )
+  ;; => {:symbol "X1-VS75-97637F",
+  ;;     :shipTypes
+  ;;     [{:type "SHIP_PROBE"}
+  ;;      {:type "SHIP_ORE_HOUND"}
+  ;;      {:type "SHIP_LIGHT_HAULER"}
+  ;;      {:type "SHIP_REFINING_FREIGHTER"}
+  ;;      {:type "SHIP_MINING_DRONE"}]}
+
+  (buy-ship "X1-VS75-97637F" "SHIP_MINING_DRONE")
 
   (ships)
-  
+
   .)
