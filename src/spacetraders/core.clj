@@ -8,8 +8,11 @@
             [taoensso.timbre.appenders.core :as log-appenders]
             [clojure.string :as str]))
 
-(log/merge-config!;
- {:appenders {:spit (log-appenders/spit-appender {:fname "spacetraders.log"})}})
+(log/merge-config!
+  {:appenders
+   {:standard-out {:enabled? false}
+    :spit
+    (log-appenders/spit-appender {:fname "spacetraders.log"})}})
 
 (def base-url "https://api.spacetraders.io/v2/")
 
