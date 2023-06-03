@@ -49,6 +49,20 @@
     endpoint
     nil)))
 
+(defn fail-on-error
+  "throw an exception if there's an error, otherwise return the response"
+  [api-call-fn & params]
+  (let [[response error] (apply api-call-fn params)]
+    (if error
+      (throw (Exception. (str error)))
+      response)))
+
+(defn show-on-error
+  "return the error instead of the response, otherwise the response"
+  [api-call-fn & params]
+  (let [[response error] (apply api-call-fn params)]
+    (if error {:error error} response)))
+
 (defn register!
   "create a new game"
   [name faction]
@@ -65,50 +79,57 @@
 
 (defn my-agent
   []
-  (let [[p e] (call-api http/get "my/agent")]
-    p))
+  (show-on-error call-api http/get "my/agent"))
 
 (defn factions
   []
-  (let [[p e] (call-api http/get "factions")]
-    p))
+  (show-on-error call-api http/get "factions"))
 
 (defn faction
   [faction-name]
-  (let [[p e] (call-api http/get (str "factions/" faction-name))]
-    p))
+  (show-on-error call-api http/get (str "factions/" faction-name)))
 
 (defn contracts
   []
-  (let [[p e] (call-api http/get "my/contracts")]
-    p))
+  (show-on-error call-api http/get "my/contracts"))
 
 (defn accept-contract
   [contract-id]
-  (let [[p e] (call-api http/post (str "my/contracts/" contract-id "/accept"))]
-    p))
+  (show-on-error call-api http/post (str "my/contracts/" contract-id "/accept")))
 
 (defn waypoints
   [system]
-  (let [[p e] (call-api http/get (str "systems/" system "/waypoints"))]
-    p))
+  (show-on-error call-api http/get (str "systems/" system "/waypoints")))
+
+(defn waypoint->system [waypoint-symbol]
+  (str/join "-" (take 2 (str/split waypoint-symbol #"-"))))
 
 (defn waypoint
   [waypoint-symbol]
-  (let [system (str/join "-" (take 2 (str/split waypoint-symbol #"-")))
-        [p e] (call-api http/get (str "systems/" system "/waypoints/" waypoint-symbol))]
-    p))
+  (show-on-error
+   call-api
+   http/get
+   (str
+    "systems/"
+    (waypoint->system waypoint-symbol)
+    "/waypoints/"
+    waypoint-symbol)))
 
 (defn shipyard
   [waypoint-symbol]
-  (let [system (str/join "-" (take 2 (str/split waypoint-symbol #"-")))
-        [p e] (call-api http/get (str "systems/" system "/waypoints/" waypoint-symbol "/shipyard"))]
-    p))
+  (show-on-error
+   call-api
+   http/get
+   (str
+    "systems/"
+    (waypoint->system waypoint-symbol)
+    "/waypoints/"
+    waypoint-symbol
+    "/shipyard")))
 
 (defn ships
   []
-  (let [[p e] (call-api http/get "my/ships")]
-    p))
+  (show-on-error call-api http/get "my/ships"))
 
 (defn has-trait-fn? [trait]
   (comp (partial some #{trait}) (partial map :symbol) :traits))
@@ -118,21 +139,23 @@
 
 (defn buy-ship
   [waypoint-symbol ship-type]
-  (let [[response error] (call-api
-                           http/post
-                           "my/ships"
-                           {:waypointSymbol waypoint-symbol :shipType ship-type})
-       ]
-    response))
+  (show-on-error call-api
+                 http/post
+                 "my/ships"
+                 {:waypointSymbol waypoint-symbol :shipType ship-type}))
 
 (defn navigate-ship
   [ship-symbol waypoint-symbol]
-  (let [[response error] (call-api
-                           http/post
-                           (str "my/ships/" ship-symbol "/navigate")
-                           {:waypointSymbol waypoint-symbol})
-        ]
-    response))
+  (show-on-error call-api
+                 http/post
+                 (str "my/ships/" ship-symbol "/navigate")
+                 {:waypointSymbol waypoint-symbol}))
+
+(defn dock-ship
+  [ship-symbol]
+  (fail-on-error call-api
+                 http/post
+                 (str "my/ships/" ship-symbol "/dock")))
 
 (comment
 
@@ -147,26 +170,26 @@
   (waypoint "X1-VS75-70500X")
 
   (->>
-    (waypoints "X1-VS75")
-    (filter (has-trait-fn? "SHIPYARD"))
-    (map :symbol)
-    first
-    shipyard
-    )
+   (waypoints "X1-VS75")
+   (filter (has-trait-fn? "SHIPYARD"))
+   (map :symbol)
+   first
+   shipyard)
 
   (->>
-    (waypoints "X1-VS75")
-    (filter (has-type-fn? "ASTEROID_FIELD"))
-    (map :symbol)
-    first
-    )
+   (waypoints "X1-VS75")
+   (filter (has-type-fn? "ASTEROID_FIELD"))
+   (map :symbol)
+   first)
 
   (buy-ship "X1-VS75-97637F" "SHIP_MINING_DRONE")
 
   (->>
-    (ships)
-    count)
+   (ships)
+   (filter (fn [s] (#{"JOHNF-2"} (:symbol s)))))
 
   (navigate-ship "JOHNF-2" "X1-VS75-67965Z")
+
+  (dock-ship "JOHNF-2")
 
   .)
