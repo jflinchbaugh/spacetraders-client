@@ -51,17 +51,15 @@
 
 (defn fail-on-error
   "throw an exception if there's an error, otherwise return the response"
-  [api-call-fn & params]
-  (let [[response error] (apply api-call-fn params)]
+  [[response error]]
     (if error
       (throw (Exception. (str error)))
-      response)))
+      response))
 
 (defn show-on-error
   "return the error instead of the response, otherwise the response"
-  [api-call-fn & params]
-  (let [[response error] (apply api-call-fn params)]
-    (if error {:error error} response)))
+  [[response error]]
+    (if error {:error error} response))
 
 (defn register!
   "create a new game"
@@ -79,27 +77,27 @@
 
 (defn my-agent
   []
-  (show-on-error call-api http/get "my/agent"))
+  (show-on-error (call-api http/get "my/agent")))
 
 (defn factions
   []
-  (show-on-error call-api http/get "factions"))
+  (show-on-error (call-api http/get "factions")))
 
 (defn faction
   [faction-name]
-  (show-on-error call-api http/get (str "factions/" faction-name)))
+  (show-on-error (call-api http/get (str "factions/" faction-name))))
 
 (defn contracts
   []
-  (show-on-error call-api http/get "my/contracts"))
+  (show-on-error (call-api http/get "my/contracts")))
 
 (defn accept-contract
   [contract-id]
-  (show-on-error call-api http/post (str "my/contracts/" contract-id "/accept")))
+  (show-on-error (call-api http/post (str "my/contracts/" contract-id "/accept"))))
 
 (defn waypoints
   [system]
-  (show-on-error call-api http/get (str "systems/" system "/waypoints")))
+  (show-on-error (call-api http/get (str "systems/" system "/waypoints"))))
 
 (defn waypoint->system [waypoint-symbol]
   (str/join "-" (take 2 (str/split waypoint-symbol #"-"))))
@@ -107,37 +105,37 @@
 (defn waypoint
   [waypoint-symbol]
   (show-on-error
-   call-api
-   http/get
-   (str
-    "systems/"
-    (waypoint->system waypoint-symbol)
-    "/waypoints/"
-    waypoint-symbol)))
+    (call-api
+      http/get
+      (str
+        "systems/"
+        (waypoint->system waypoint-symbol)
+        "/waypoints/"
+        waypoint-symbol))))
 
 (defn shipyard
   [waypoint-symbol]
   (show-on-error
-   call-api
-   http/get
-   (str
-    "systems/"
-    (waypoint->system waypoint-symbol)
-    "/waypoints/"
-    waypoint-symbol
-    "/shipyard")))
+    (call-api
+      http/get
+      (str
+        "systems/"
+        (waypoint->system waypoint-symbol)
+        "/waypoints/"
+        waypoint-symbol
+        "/shipyard"))))
 
 (defn market
   [waypoint-symbol]
   (show-on-error
-    call-api
-    http/get
-    (str
-      "systems/"
-      (waypoint->system waypoint-symbol)
-      "/waypoints/"
-      waypoint-symbol
-      "/market")))
+    (call-api
+      http/get
+      (str
+        "systems/"
+        (waypoint->system waypoint-symbol)
+        "/waypoints/"
+        waypoint-symbol
+        "/market"))))
 
 (defn ships
   []
@@ -151,56 +149,56 @@
 
 (defn buy-ship
   [waypoint-symbol ship-type]
-  (show-on-error call-api
-                 http/post
-                 "my/ships"
-                 {:waypointSymbol waypoint-symbol :shipType ship-type}))
+  (show-on-error (call-api
+                   http/post
+                   "my/ships"
+                   {:waypointSymbol waypoint-symbol :shipType ship-type})))
 
 
 (defn ship
   [ship-symbol]
-  (show-on-error call-api
-    http/get
-    (str "my/ships/" ship-symbol)))
+  (show-on-error (call-api
+                   http/get
+                   (str "my/ships/" ship-symbol))))
 
 (defn navigate-ship
   [ship-symbol waypoint-symbol]
-  (show-on-error call-api
-                 http/post
-                 (str "my/ships/" ship-symbol "/navigate")
-                 {:waypointSymbol waypoint-symbol}))
+  (show-on-error (call-api
+                   http/post
+                   (str "my/ships/" ship-symbol "/navigate")
+                   {:waypointSymbol waypoint-symbol})))
 
 (defn dock-ship
   [ship-symbol]
-  (show-on-error call-api
-                 http/post
-                 (str "my/ships/" ship-symbol "/dock")))
+  (show-on-error (call-api
+                   http/post
+                   (str "my/ships/" ship-symbol "/dock"))))
 
 (defn sell
   [ship-symbol trade-symbol units]
-  (show-on-error call-api
-    http/post
-    (str "my/ships/" ship-symbol "/sell")
-    {:symbol trade-symbol
-     :units units}))
+  (show-on-error (call-api
+                   http/post
+                   (str "my/ships/" ship-symbol "/sell")
+                   {:symbol trade-symbol
+                    :units units})))
 
 (defn refuel-ship
   [ship-symbol]
-  (show-on-error call-api
-    http/post
-    (str "my/ships/" ship-symbol "/refuel")))
+  (show-on-error (call-api
+                   http/post
+                   (str "my/ships/" ship-symbol "/refuel"))))
 
 (defn orbit-ship
   [ship-symbol]
-  (show-on-error call-api
-    http/post
-    (str "my/ships/" ship-symbol "/orbit")))
+  (show-on-error (call-api
+                   http/post
+                   (str "my/ships/" ship-symbol "/orbit"))))
 
 (defn extract
   [ship-symbol]
-  (show-on-error call-api
-    http/post
-    (str "my/ships/" ship-symbol "/extract")))
+  (show-on-error (call-api
+                   http/post
+                   (str "my/ships/" ship-symbol "/extract"))))
 
 (comment
 
@@ -246,27 +244,9 @@
   (extract "JOHNF-2")
 
   (:cargo (ship "JOHNF-2"))
-  ;; => {:capacity 30,
-  ;;     :units 27,
-  ;;     :inventory
-  ;;     [{:symbol "AMMONIA_ICE",
-  ;;       :name "Ammonia Ice",
-  ;;       :description
-  ;;       "A valuable substance used in the production of fertilizers and other chemical products.",
-  ;;       :units 14}
-  ;;      {:symbol "ICE_WATER",
-  ;;       :name "Fresh Water",
-  ;;       :description
-  ;;       "High-quality fresh water, essential for life support and hydroponic agriculture.",
-  ;;       :units 5}
-  ;;      {:symbol "QUARTZ_SAND",
-  ;;       :name "Quartz Sand",
-  ;;       :description
-  ;;       "High-purity quartz sand used in the production of glass and ceramics.",
-  ;;       :units 8}]}
 
   (->> "X1-VS75-67965Z"
-    market)
-    :tradeGoods)
+    market
+    #_:tradeGoods)
 
   .)
