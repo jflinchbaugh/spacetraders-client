@@ -156,6 +156,13 @@
                  "my/ships"
                  {:waypointSymbol waypoint-symbol :shipType ship-type}))
 
+
+(defn ship
+  [ship-symbol]
+  (show-on-error call-api
+    http/get
+    (str "my/ships/" ship-symbol)))
+
 (defn navigate-ship
   [ship-symbol waypoint-symbol]
   (show-on-error call-api
@@ -169,6 +176,14 @@
                  http/post
                  (str "my/ships/" ship-symbol "/dock")))
 
+(defn sell
+  [ship-symbol trade-symbol units]
+  (show-on-error call-api
+    http/post
+    (str "my/ships/" ship-symbol "/sell")
+    {:symbol trade-symbol
+     :units units}))
+
 (defn refuel-ship
   [ship-symbol]
   (show-on-error call-api
@@ -181,7 +196,7 @@
     http/post
     (str "my/ships/" ship-symbol "/orbit")))
 
-(defn extract-ore
+(defn extract
   [ship-symbol]
   (show-on-error call-api
     http/post
@@ -228,8 +243,30 @@
 
   (orbit-ship "JOHNF-2")
 
-  (extract-ore "JOHNF-2")
+  (extract "JOHNF-2")
 
-  (market "X1-VS75-67965Z")
+  (:cargo (ship "JOHNF-2"))
+  ;; => {:capacity 30,
+  ;;     :units 27,
+  ;;     :inventory
+  ;;     [{:symbol "AMMONIA_ICE",
+  ;;       :name "Ammonia Ice",
+  ;;       :description
+  ;;       "A valuable substance used in the production of fertilizers and other chemical products.",
+  ;;       :units 14}
+  ;;      {:symbol "ICE_WATER",
+  ;;       :name "Fresh Water",
+  ;;       :description
+  ;;       "High-quality fresh water, essential for life support and hydroponic agriculture.",
+  ;;       :units 5}
+  ;;      {:symbol "QUARTZ_SAND",
+  ;;       :name "Quartz Sand",
+  ;;       :description
+  ;;       "High-purity quartz sand used in the production of glass and ceramics.",
+  ;;       :units 8}]}
+
+  (->> "X1-VS75-67965Z"
+    market)
+    :tradeGoods)
 
   .)
