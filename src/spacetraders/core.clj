@@ -127,6 +127,18 @@
     waypoint-symbol
     "/shipyard")))
 
+(defn market
+  [waypoint-symbol]
+  (show-on-error
+    call-api
+    http/get
+    (str
+      "systems/"
+      (waypoint->system waypoint-symbol)
+      "/waypoints/"
+      waypoint-symbol
+      "/market")))
+
 (defn ships
   []
   (show-on-error call-api http/get "my/ships"))
@@ -153,21 +165,27 @@
 
 (defn dock-ship
   [ship-symbol]
-  (fail-on-error call-api
+  (show-on-error call-api
                  http/post
                  (str "my/ships/" ship-symbol "/dock")))
 
 (defn refuel-ship
   [ship-symbol]
-  (fail-on-error call-api
+  (show-on-error call-api
     http/post
     (str "my/ships/" ship-symbol "/refuel")))
 
 (defn orbit-ship
   [ship-symbol]
-  (fail-on-error call-api
+  (show-on-error call-api
     http/post
     (str "my/ships/" ship-symbol "/orbit")))
+
+(defn extract-ore
+  [ship-symbol]
+  (show-on-error call-api
+    http/post
+    (str "my/ships/" ship-symbol "/extract")))
 
 (comment
 
@@ -204,10 +222,14 @@
 
   (dock-ship "JOHNF-2")
 
-  (map (juxt :symbol :fuel) (ships))
+  (map (juxt :symbol :cargo :fuel) (ships))
 
   (refuel-ship "JOHNF-2")
 
   (orbit-ship "JOHNF-2")
+
+  (extract-ore "JOHNF-2")
+
+  (market "X1-VS75-67965Z")
 
   .)
