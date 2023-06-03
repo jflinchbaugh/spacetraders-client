@@ -93,7 +93,27 @@
 
 (defn accept-contract
   [contract-id]
-  (show-on-error (call-api http/post (str "my/contracts/" contract-id "/accept"))))
+  (show-on-error
+    (call-api
+      http/post
+      (str "my/contracts/" contract-id "/accept"))))
+
+(defn deliver-contract
+  [contract-id ship-symbol trade-symbol units]
+  (show-on-error
+    (call-api
+      http/post
+      (str "my/contracts/" contract-id "/deliver")
+      {:shipSymbol ship-symbol
+       :tradeSymbol trade-symbol
+       :units units})))
+
+(defn fulfill-contract
+  [contract-id]
+  (show-on-error
+    (call-api
+      http/post
+      (str "my/contracts/" contract-id "/fulfill"))))
 
 (defn waypoints
   [system]
@@ -261,21 +281,32 @@
 
   (refuel-ship "JOHNF-3")
 
-  ((juxt :cargo (comp :expiration :cooldown)) (extract "JOHNF-3"))
+  (->>
+    (extract "JOHNF-3")
+    ((juxt
+       (comp :expiration :cooldown)
+       :extraction
+       (comp :units :cargo))))
+
+  (java.util.Date.)
 
   (->> "JOHNF-3"
        ship
        :cargo)
 
   ;; sell everything but the aluminum ore
-  (->> "JOHNF-3"
-       ship
-       :cargo
-       :inventory
-       (remove (comp #{"ALUMINUM_ORE"} :symbol))
-       (map (juxt :symbol :units))
-       (map (partial apply sell "JOHNF-3"))
-       doall)
+  (do
+    (dock-ship "JOHNF-3")
+    (->> "JOHNF-3"
+      ship
+      :cargo
+      :inventory
+      (remove (comp #{"ALUMINUM_ORE"} :symbol))
+      (map (juxt :symbol :units))
+      (map (partial apply sell "JOHNF-3"))
+      doall)
+    (orbit-ship "JOHNF-3")
+    (->> "JOHNF-3" ship :cargo))
 
   (my-agent)
 
