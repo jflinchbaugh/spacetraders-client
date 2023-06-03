@@ -249,9 +249,21 @@
 
   (orbit-ship "JOHNF-3")
 
-  (extract "JOHNF-3")
+  ((juxt :cargo (comp :expiration :cooldown)) (extract "JOHNF-3"))
 
-  (:cargo (ship "JOHNF-3"))
+  (->> "JOHNF-3"
+    ship
+    :cargo)
+
+  ;; sell everything but the aluminum ore
+  (->> "JOHNF-3"
+    ship
+    :cargo
+    :inventory
+    (remove (comp #{"ALUMINUM_ORE"} :symbol))
+    (map (juxt :symbol :units))
+    (map (partial apply sell "JOHNF-3"))
+    doall)
 
   (->> "X1-HQ18-98695F"
        market
