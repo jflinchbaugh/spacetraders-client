@@ -1,3 +1,5 @@
 # spacetraders client
 
-run it in the repl
+https://spacetraders.io/
+
+Run this code in the REPL.
