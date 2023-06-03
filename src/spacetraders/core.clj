@@ -63,7 +63,7 @@
           (reset! token new-token)
           response))))
 
-(defn agent
+(defn my-agent
   []
   (let [[p e] (call-api http/get "my/agent")]
     p))
@@ -110,6 +110,12 @@
   (let [[p e] (call-api http/get "my/ships")]
     p))
 
+(defn has-trait-fn? [trait]
+  (comp (partial some #{trait}) (partial map :symbol) :traits))
+
+(defn has-type-fn? [type]
+  (comp (partial = type) :type))
+
 (defn buy-ship
   [waypoint-symbol ship-type]
   (let [[response error] (call-api
@@ -119,11 +125,20 @@
        ]
     response))
 
+(defn navigate-ship
+  [ship-symbol waypoint-symbol]
+  (let [[response error] (call-api
+                           http/post
+                           (str "my/ships/" ship-symbol "/navigate")
+                           {:waypointSymbol waypoint-symbol})
+        ]
+    response))
+
 (comment
 
   (register! "JOHNF" "COSMIC")
 
-  (agent)
+  (my-agent)
 
   (contracts)
 
@@ -133,21 +148,25 @@
 
   (->>
     (waypoints "X1-VS75")
-    (filter (comp (partial some #{"SHIPYARD"}) (partial map :symbol) :traits))
+    (filter (has-trait-fn? "SHIPYARD"))
     (map :symbol)
     first
     shipyard
     )
-  ;; => {:symbol "X1-VS75-97637F",
-  ;;     :shipTypes
-  ;;     [{:type "SHIP_PROBE"}
-  ;;      {:type "SHIP_ORE_HOUND"}
-  ;;      {:type "SHIP_LIGHT_HAULER"}
-  ;;      {:type "SHIP_REFINING_FREIGHTER"}
-  ;;      {:type "SHIP_MINING_DRONE"}]}
+
+  (->>
+    (waypoints "X1-VS75")
+    (filter (has-type-fn? "ASTEROID_FIELD"))
+    (map :symbol)
+    first
+    )
 
   (buy-ship "X1-VS75-97637F" "SHIP_MINING_DRONE")
 
-  (ships)
+  (->>
+    (ships)
+    count)
+
+  (navigate-ship "JOHNF-2" "X1-VS75-67965Z")
 
   .)
