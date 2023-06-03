@@ -52,14 +52,14 @@
 (defn fail-on-error
   "throw an exception if there's an error, otherwise return the response"
   [[response error]]
-    (if error
-      (throw (Exception. (str error)))
-      response))
+  (if error
+    (throw (Exception. (str error)))
+    response))
 
 (defn show-on-error
   "return the error instead of the response, otherwise the response"
   [[response error]]
-    (if error {:error error} response))
+  (if error {:error error} response))
 
 (defn register!
   "create a new game"
@@ -105,41 +105,41 @@
 (defn waypoint
   [waypoint-symbol]
   (show-on-error
-    (call-api
-      http/get
-      (str
-        "systems/"
-        (waypoint->system waypoint-symbol)
-        "/waypoints/"
-        waypoint-symbol))))
+   (call-api
+    http/get
+    (str
+     "systems/"
+     (waypoint->system waypoint-symbol)
+     "/waypoints/"
+     waypoint-symbol))))
 
 (defn shipyard
   [waypoint-symbol]
   (show-on-error
-    (call-api
-      http/get
-      (str
-        "systems/"
-        (waypoint->system waypoint-symbol)
-        "/waypoints/"
-        waypoint-symbol
-        "/shipyard"))))
+   (call-api
+    http/get
+    (str
+     "systems/"
+     (waypoint->system waypoint-symbol)
+     "/waypoints/"
+     waypoint-symbol
+     "/shipyard"))))
 
 (defn market
   [waypoint-symbol]
   (show-on-error
-    (call-api
-      http/get
-      (str
-        "systems/"
-        (waypoint->system waypoint-symbol)
-        "/waypoints/"
-        waypoint-symbol
-        "/market"))))
+   (call-api
+    http/get
+    (str
+     "systems/"
+     (waypoint->system waypoint-symbol)
+     "/waypoints/"
+     waypoint-symbol
+     "/market"))))
 
 (defn ships
   []
-  (show-on-error call-api http/get "my/ships"))
+  (show-on-error (call-api http/get "my/ships")))
 
 (defn has-trait-fn? [trait]
   (comp (partial some #{trait}) (partial map :symbol) :traits))
@@ -150,55 +150,54 @@
 (defn buy-ship
   [waypoint-symbol ship-type]
   (show-on-error (call-api
-                   http/post
-                   "my/ships"
-                   {:waypointSymbol waypoint-symbol :shipType ship-type})))
-
+                  http/post
+                  "my/ships"
+                  {:waypointSymbol waypoint-symbol :shipType ship-type})))
 
 (defn ship
   [ship-symbol]
   (show-on-error (call-api
-                   http/get
-                   (str "my/ships/" ship-symbol))))
+                  http/get
+                  (str "my/ships/" ship-symbol))))
 
 (defn navigate-ship
   [ship-symbol waypoint-symbol]
   (show-on-error (call-api
-                   http/post
-                   (str "my/ships/" ship-symbol "/navigate")
-                   {:waypointSymbol waypoint-symbol})))
+                  http/post
+                  (str "my/ships/" ship-symbol "/navigate")
+                  {:waypointSymbol waypoint-symbol})))
 
 (defn dock-ship
   [ship-symbol]
   (show-on-error (call-api
-                   http/post
-                   (str "my/ships/" ship-symbol "/dock"))))
+                  http/post
+                  (str "my/ships/" ship-symbol "/dock"))))
 
 (defn sell
   [ship-symbol trade-symbol units]
   (show-on-error (call-api
-                   http/post
-                   (str "my/ships/" ship-symbol "/sell")
-                   {:symbol trade-symbol
-                    :units units})))
+                  http/post
+                  (str "my/ships/" ship-symbol "/sell")
+                  {:symbol trade-symbol
+                   :units units})))
 
 (defn refuel-ship
   [ship-symbol]
   (show-on-error (call-api
-                   http/post
-                   (str "my/ships/" ship-symbol "/refuel"))))
+                  http/post
+                  (str "my/ships/" ship-symbol "/refuel"))))
 
 (defn orbit-ship
   [ship-symbol]
   (show-on-error (call-api
-                   http/post
-                   (str "my/ships/" ship-symbol "/orbit"))))
+                  http/post
+                  (str "my/ships/" ship-symbol "/orbit"))))
 
 (defn extract
   [ship-symbol]
   (show-on-error (call-api
-                   http/post
-                   (str "my/ships/" ship-symbol "/extract"))))
+                  http/post
+                  (str "my/ships/" ship-symbol "/extract"))))
 
 (comment
 
@@ -208,45 +207,59 @@
 
   (contracts)
 
-  (accept-contract "clhy1w7cb1cqns60dobah308a")
+  (accept-contract "clig802b90096s60d2ta3j9z8")
 
-  (waypoint "X1-VS75-70500X")
+  (waypoint "X1-HQ18-11700D")
 
+  ;; find the shipyard in the same system
   (->>
-   (waypoints "X1-VS75")
+   (waypoints (waypoint->system "X1-HQ18-11700D"))
    (filter (has-trait-fn? "SHIPYARD"))
    (map :symbol)
    first
-   shipyard)
+   shipyard
+   :symbol)
+  ;; => "X1-HQ18-60817D"
+
+  (buy-ship "X1-HQ18-60817D" "SHIP_MINING_DRONE")
 
   (->>
-   (waypoints "X1-VS75")
+   "X1-HQ18-11700D"
+   waypoint->system
+   waypoints
    (filter (has-type-fn? "ASTEROID_FIELD"))
    (map :symbol)
    first)
-
-  (buy-ship "X1-VS75-97637F" "SHIP_MINING_DRONE")
+  ;; => "X1-HQ18-98695F"
 
   (->>
    (ships)
-   (filter (fn [s] (#{"JOHNF-2"} (:symbol s)))))
+   (map :symbol))
+  ;; => ("JOHNF-1" "JOHNF-2" "JOHNF-3")
 
-  (navigate-ship "JOHNF-2" "X1-VS75-67965Z")
+  (ship "JOHNF-3")
 
-  (dock-ship "JOHNF-2")
+  (navigate-ship "JOHNF-3" "X1-HQ18-98695F")
+
+  (dock-ship "JOHNF-3")
 
   (map (juxt :symbol :cargo :fuel) (ships))
 
-  (refuel-ship "JOHNF-2")
+  (refuel-ship "JOHNF-3")
 
-  (orbit-ship "JOHNF-2")
+  (orbit-ship "JOHNF-3")
 
-  (extract "JOHNF-2")
+  (extract "JOHNF-3")
 
-  (:cargo (ship "JOHNF-2"))
+  (:cargo (ship "JOHNF-3"))
 
-  (->> "X1-VS75-67965Z"
-    market
-    #_:tradeGoods)
+  (->> "X1-HQ18-98695F"
+       market
+       :tradeGoods)
+
+  (my-agent)
+
+  (sell "JOHNF-3" "QUARTZ_SAND" 7)
+
 
   .)
