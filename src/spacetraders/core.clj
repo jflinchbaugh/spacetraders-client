@@ -284,6 +284,7 @@
 
   (refuel-ship "JOHNF-3")
 
+  ;; extract from asteroids
   (->>
     (extract "JOHNF-3")
     ((juxt
