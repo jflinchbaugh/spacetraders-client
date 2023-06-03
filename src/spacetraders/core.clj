@@ -139,7 +139,10 @@
 
 (defn ships
   []
-  (show-on-error (call-api http/get "my/ships")))
+  (show-on-error
+   (call-api
+    http/get
+    "my/ships")))
 
 (defn has-trait-fn? [trait]
   (comp (partial some #{trait}) (partial map :symbol) :traits))
@@ -149,55 +152,64 @@
 
 (defn buy-ship
   [waypoint-symbol ship-type]
-  (show-on-error (call-api
-                  http/post
-                  "my/ships"
-                  {:waypointSymbol waypoint-symbol :shipType ship-type})))
+  (show-on-error
+   (call-api
+    http/post
+    "my/ships"
+    {:waypointSymbol waypoint-symbol
+     :shipType ship-type})))
 
 (defn ship
   [ship-symbol]
-  (show-on-error (call-api
-                  http/get
-                  (str "my/ships/" ship-symbol))))
+  (show-on-error
+   (call-api
+    http/get
+    (str "my/ships/" ship-symbol))))
 
 (defn navigate-ship
   [ship-symbol waypoint-symbol]
-  (show-on-error (call-api
-                  http/post
-                  (str "my/ships/" ship-symbol "/navigate")
-                  {:waypointSymbol waypoint-symbol})))
+  (show-on-error
+   (call-api
+    http/post
+    (str "my/ships/" ship-symbol "/navigate")
+    {:waypointSymbol waypoint-symbol})))
 
 (defn dock-ship
   [ship-symbol]
-  (show-on-error (call-api
-                  http/post
-                  (str "my/ships/" ship-symbol "/dock"))))
+  (show-on-error
+   (call-api
+    http/post
+    (str "my/ships/" ship-symbol "/dock"))))
 
 (defn sell
   [ship-symbol trade-symbol units]
-  (show-on-error (call-api
-                  http/post
-                  (str "my/ships/" ship-symbol "/sell")
-                  {:symbol trade-symbol
-                   :units units})))
+  (show-on-error
+   (call-api
+    http/post
+    (str "my/ships/" ship-symbol "/sell")
+    {:symbol trade-symbol
+     :units units})))
 
 (defn refuel-ship
   [ship-symbol]
-  (show-on-error (call-api
-                  http/post
-                  (str "my/ships/" ship-symbol "/refuel"))))
+  (show-on-error
+   (call-api
+    http/post
+    (str "my/ships/" ship-symbol "/refuel"))))
 
 (defn orbit-ship
   [ship-symbol]
-  (show-on-error (call-api
-                  http/post
-                  (str "my/ships/" ship-symbol "/orbit"))))
+  (show-on-error
+   (call-api
+    http/post
+    (str "my/ships/" ship-symbol "/orbit"))))
 
 (defn extract
   [ship-symbol]
-  (show-on-error (call-api
-                  http/post
-                  (str "my/ships/" ship-symbol "/extract"))))
+  (show-on-error
+   (call-api
+    http/post
+    (str "my/ships/" ship-symbol "/extract"))))
 
 (comment
 
@@ -243,35 +255,28 @@
 
   (dock-ship "JOHNF-3")
 
+  (orbit-ship "JOHNF-3")
+
   (map (juxt :symbol :cargo :fuel) (ships))
 
   (refuel-ship "JOHNF-3")
 
-  (orbit-ship "JOHNF-3")
-
   ((juxt :cargo (comp :expiration :cooldown)) (extract "JOHNF-3"))
 
   (->> "JOHNF-3"
-    ship
-    :cargo)
+       ship
+       :cargo)
 
   ;; sell everything but the aluminum ore
   (->> "JOHNF-3"
-    ship
-    :cargo
-    :inventory
-    (remove (comp #{"ALUMINUM_ORE"} :symbol))
-    (map (juxt :symbol :units))
-    (map (partial apply sell "JOHNF-3"))
-    doall)
-
-  (->> "X1-HQ18-98695F"
-       market
-       :tradeGoods)
+       ship
+       :cargo
+       :inventory
+       (remove (comp #{"ALUMINUM_ORE"} :symbol))
+       (map (juxt :symbol :units))
+       (map (partial apply sell "JOHNF-3"))
+       doall)
 
   (my-agent)
-
-  (sell "JOHNF-3" "QUARTZ_SAND" 7)
-
 
   .)
