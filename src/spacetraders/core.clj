@@ -157,6 +157,12 @@
                  http/post
                  (str "my/ships/" ship-symbol "/dock")))
 
+(defn refuel-ship
+  [ship-symbol]
+  (fail-on-error call-api
+    http/post
+    (str "my/ships/" ship-symbol "/refuel")))
+
 (comment
 
   (register! "JOHNF" "COSMIC")
@@ -191,5 +197,9 @@
   (navigate-ship "JOHNF-2" "X1-VS75-67965Z")
 
   (dock-ship "JOHNF-2")
+
+  (map (juxt :symbol :fuel) (ships))
+
+  (refuel-ship "JOHNF-2")
 
   .)
