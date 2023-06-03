@@ -163,6 +163,12 @@
     http/post
     (str "my/ships/" ship-symbol "/refuel")))
 
+(defn orbit-ship
+  [ship-symbol]
+  (fail-on-error call-api
+    http/post
+    (str "my/ships/" ship-symbol "/orbit")))
+
 (comment
 
   (register! "JOHNF" "COSMIC")
@@ -201,5 +207,7 @@
   (map (juxt :symbol :fuel) (ships))
 
   (refuel-ship "JOHNF-2")
+
+  (orbit-ship "JOHNF-2")
 
   .)
