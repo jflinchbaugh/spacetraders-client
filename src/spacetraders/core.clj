@@ -82,6 +82,10 @@
   []
   (show-on-error (call-api http/get "my/agent")))
 
+(defn my-factions
+  []
+  (show-on-error (call-api http/get "my/factions")))
+
 (defn factions
   []
   (show-on-error (call-api http/get "factions")))
@@ -323,5 +327,7 @@
   (orbit-ship "JOHNF-3")
 
   (my-agent)
+
+  (my-factions)
 
   .)
