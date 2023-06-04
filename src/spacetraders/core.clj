@@ -312,6 +312,16 @@
     (orbit-ship "JOHNF-3")
     (->> "JOHNF-3" ship :cargo))
 
+  (navigate-ship "JOHNF-3" "X1-HQ18-93722X")
+
+  (dock-ship "JOHNF-3")
+
+  (deliver-contract "clig802b90096s60d2ta3j9z8" "JOHNF-3" "ALUMINUM_ORE" 21)
+
+  (fulfill-contract "clig802b90096s60d2ta3j9z8")
+
+  (orbit-ship "JOHNF-3")
+
   (my-agent)
 
   .)
