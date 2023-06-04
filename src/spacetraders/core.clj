@@ -122,6 +122,10 @@
       http/post
       (str "my/contracts/" contract-id "/fulfill"))))
 
+(defn systems
+  []
+  (show-on-error (call-api http/get "systems")))
+
 (defn waypoints
   [system]
   (show-on-error (call-api http/get (str "systems/" system "/waypoints"))))
@@ -329,5 +333,7 @@
   (my-agent)
 
   (my-factions)
+
+  (systems)
 
   .)
